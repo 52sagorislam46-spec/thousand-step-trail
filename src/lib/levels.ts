@@ -53,8 +53,8 @@ export interface Progress {
 const STORAGE_KEY = "game-level-progress";
 
 export const DEFAULT_PROGRESS: Progress = {
-  unlocked: 6,
-  stars: { 1: 3, 2: 3, 3: 2, 4: 2, 5: 2 },
+  unlocked: 1,
+  stars: {},
 };
 
 export function loadProgress(): Progress {
