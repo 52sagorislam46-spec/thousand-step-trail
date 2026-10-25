@@ -59,6 +59,22 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-game-bg-top: var(--game-bg-top);
+  --color-game-bg-bottom: var(--game-bg-bottom);
+  --color-game-path: var(--game-path);
+  --color-game-path-light: var(--game-path-light);
+  --color-game-header: var(--game-header);
+  --color-game-base: var(--game-base);
+  --color-game-node-locked: var(--game-node-locked);
+  --color-game-node-locked-deep: var(--game-node-locked-deep);
+  --color-game-node-done: var(--game-node-done);
+  --color-game-node-done-deep: var(--game-node-done-deep);
+  --color-game-node-current: var(--game-node-current);
+  --color-game-node-current-deep: var(--game-node-current-deep);
+  --color-game-gold: var(--game-gold);
+  --color-game-gold-deep: var(--game-gold-deep);
+  --color-game-text: var(--game-text);
+  --color-game-btn-text: var(--game-btn-text);
 }
 
 :root {
@@ -95,6 +111,24 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Game level-map palette (fixed regardless of light/dark theme) */
+  --game-bg-top: oklch(0.36 0.1 292);
+  --game-bg-bottom: oklch(0.25 0.09 295);
+  --game-path: oklch(0.5 0.13 289);
+  --game-path-light: oklch(0.58 0.13 289);
+  --game-header: oklch(0.3 0.09 292);
+  --game-base: oklch(0.22 0.06 292);
+  --game-node-locked: oklch(0.78 0.015 260);
+  --game-node-locked-deep: oklch(0.58 0.02 260);
+  --game-node-done: oklch(0.64 0.22 22);
+  --game-node-done-deep: oklch(0.46 0.19 22);
+  --game-node-current: oklch(0.68 0.24 25);
+  --game-node-current-deep: oklch(0.5 0.21 25);
+  --game-gold: oklch(0.86 0.16 88);
+  --game-gold-deep: oklch(0.72 0.15 75);
+  --game-text: oklch(0.98 0.01 90);
+  --game-btn-text: oklch(0.38 0.12 35);
 }
 
 .dark {
@@ -140,5 +174,47 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: "Baloo Da 2", ui-rounded, system-ui, sans-serif;
   }
+}
+
+/* ===== Game level map ===== */
+
+.game-bg {
+  background: linear-gradient(180deg, var(--game-bg-top), var(--game-bg-bottom));
+}
+
+@keyframes game-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 color-mix(in oklab, var(--game-gold) 55%, transparent),
+      0 4px 10px rgb(0 0 0 / 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 0 9px transparent,
+      0 4px 10px rgb(0 0 0 / 0.35);
+  }
+}
+
+.game-current-ring {
+  animation: game-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes game-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.game-shake {
+  animation: game-shake 0.3s ease;
 }
