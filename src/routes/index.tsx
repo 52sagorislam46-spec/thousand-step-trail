@@ -11,6 +11,7 @@ import {
   smoothPath,
   type Progress,
 } from "@/lib/levels";
+import { BubbleShooterGame } from "@/components/bubble-shooter/BubbleShooterGame";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -52,6 +53,7 @@ export function LevelMapPage() {
   const [progress, setProgress] = useState<Progress | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [playing, setPlaying] = useState<number | null>(null);
   const [shake, setShake] = useState<number | null>(null);
   const nodeRefs = useRef(new Map<number, HTMLElement>());
 
@@ -80,14 +82,16 @@ export function LevelMapPage() {
     );
   }
 
-  const completeLevel = (level: number) => {
-    const next: Progress = {
-      unlocked: Math.max(progress.unlocked, level + 1),
-      stars: { ...progress.stars, [level]: 3 },
-    };
-    saveProgress(next);
-    setProgress(next);
-    setSelected(null);
+  const completeLevel = (level: number, stars: number) => {
+    setProgress((prev) => {
+      const base = prev ?? progress;
+      const next: Progress = {
+        unlocked: Math.min(LEVEL_TOTAL, Math.max(base.unlocked, level + 1)),
+        stars: { ...base.stars, [level]: Math.max(base.stars[level] ?? 0, stars) },
+      };
+      saveProgress(next);
+      return next;
+    });
   };
 
   const resetProgress = () => {
@@ -291,13 +295,25 @@ export function LevelMapPage() {
             <p className="mt-2 text-sm text-white/70">জিতে নিন ৩টা তারা!</p>
             <button
               type="button"
-              onClick={() => completeLevel(selected)}
+              onClick={() => {
+                setPlaying(selected);
+                setSelected(null);
+              }}
               className="mt-4 w-full rounded-2xl bg-gradient-to-b from-game-gold to-game-gold-deep px-6 py-3 text-lg font-extrabold text-game-btn-text shadow-lg transition-transform active:scale-95"
             >
               খেলুন
             </button>
           </div>
         </div>
+      )}
+
+      {playing !== null && (
+        <BubbleShooterGame
+          key={playing}
+          level={playing}
+          onWin={(stars) => completeLevel(playing, stars)}
+          onClose={() => setPlaying(null)}
+        />
       )}
 
       {showHelp && (
@@ -321,7 +337,7 @@ export function LevelMapPage() {
             <ul className="mt-3 list-disc space-y-2 pl-4 text-left text-sm text-white/85">
               <li>পথ ধরে ১০০০টি লেভেল — যেটা এখনো খেলা হয়নি, সেটাই আপনার বর্তমান লেভেল।</li>
               <li>লেভেলে ট্যাপ করে “খেলুন” চাপুন।</li>
-              <li>তারা জিতলে পরের লেভেল খুলে যাবে।</li>
+              <li>বাবল ছুড়ে একই রঙের ৩টা মিলিয়ে ফাটান — সব বাবল সাফ করলে পরের লেভেল খুলবে।</li>
               <li>আপনার প্রগ্রেস ডিভাইসে সেভ থাকে।</li>
             </ul>
           </div>
