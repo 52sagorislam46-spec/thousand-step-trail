@@ -134,7 +134,6 @@ export function BubbleShooterGame({ level, onWin, onClose }: Props) {
       for (let r = 0; r < GRID_ROWS; r++)
         for (let c = 0; c < GRID_COLS; c++) {
           if (grid[r]![c] != null) continue;
-          if (r % 2 === 1 && c === GRID_COLS - 1) continue;
           const attached = r === 0 || neighbors(r, c).some(([nr, nc]) => grid[nr]![nc] != null);
           if (!attached) continue;
           const d = Math.hypot(cellX(r, c) - x, cellY(r) - y);
@@ -148,10 +147,10 @@ export function BubbleShooterGame({ level, onWin, onClose }: Props) {
       if (!cell) return;
       const [r, c] = cell;
       grid[r]![c] = b.color;
+      const snapshot = grid.map((row) => [...row]);
       const { popped, dropped } = resolveShot(grid, r, c);
       for (const [pr, pc] of [...popped, ...dropped])
-        falling.push({ x: cellX(pr, pc), y: cellY(pr), vy: -2 + Math.random() * 2, color: popped.length ? b.color : 0, a: 1 });
-      // fix colors of falling bubbles (resolveShot already cleared them)
+        falling.push({ x: cellX(pr, pc), y: cellY(pr), vy: -2 + Math.random() * 2, color: snapshot[pr]![pc] ?? 0, a: 1 });
       if (boardColors(grid).length === 0) return finish("won");
       if (grid[GRID_ROWS - 1]!.some((v) => v != null)) return finish("lost");
       const cols = boardColors(grid);
