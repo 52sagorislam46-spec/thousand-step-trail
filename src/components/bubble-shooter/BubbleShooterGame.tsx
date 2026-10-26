@@ -278,24 +278,34 @@ export function BubbleShooterGame({ level, onWin, onClose }: Props) {
       drawBase(ctx, shots, now / 1000);
 
       if (!done) {
-        // aim guide with one wall bounce
-        ctx.setLineDash([4, 8]);
-        ctx.strokeStyle = "rgba(255,255,255,0.6)";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
+        // full aim guide: simulate path (wall bounces) until it hits a bubble or the top
         let x = BASE_X, y = LAUNCH_Y, dx = Math.cos(aim), dy = Math.sin(aim);
-        ctx.moveTo(x, y);
-        for (let i = 0; i < 2; i++) {
-          const tx = dx < 0 ? (R - x) / dx : (W - R - x) / dx;
-          const ty = (R - y) / dy;
-          const t = Math.min(tx, ty, 260);
-          x += dx * t; y += dy * t;
-          ctx.lineTo(x, y);
-          if (t !== tx) break;
-          dx = -dx;
+        const pts: { x: number; y: number }[] = [];
+        let dist = 0;
+        for (let i = 0; i < 2000; i++) {
+          x += dx * 3; y += dy * 3; dist += 3;
+          if (x < R) { x = R; dx = -dx; }
+          if (x > W - R) { x = W - R; dx = -dx; }
+          let stop = y <= R;
+          if (!stop)
+            outer2: for (let r = 0; r < GRID_ROWS; r++)
+              for (let c = 0; c < GRID_COLS; c++)
+                if (grid[r]![c] != null && Math.hypot(cellX(r, c) - x, cellY(r) - y) < 2 * R * 0.85) { stop = true; break outer2; }
+          if (stop) break;
+          if (dist >= 18 && Math.round(dist) % 18 === 0) pts.push({ x, y });
         }
+        const col = BUBBLE_COLORS[current]!;
+        for (const p of pts) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
+          ctx.fillStyle = col.base;
+          ctx.fill();
+        }
+        ctx.beginPath();
+        ctx.arc(x, y, R - 1, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255,255,255,0.85)";
+        ctx.lineWidth = 2;
         ctx.stroke();
-        ctx.setLineDash([]);
       }
       if (ball) drawBubble(ctx, ball.x, ball.y, ball.color);
       else if (!done) drawBubble(ctx, BASE_X, LAUNCH_Y, current, 1, 1.15);
