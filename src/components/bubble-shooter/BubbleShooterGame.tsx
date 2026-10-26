@@ -181,6 +181,7 @@ export function BubbleShooterGame({ level, onWin, onClose }: Props) {
           const t = current;
           current = next;
           next = t;
+          aim = -Math.PI / 2;
           sfx.swap();
         }
         return;
