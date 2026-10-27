@@ -39,7 +39,7 @@ export function startMusic() {
     const o = c.createOscillator();
     const g = c.createGain();
     o.type = "sine";
-    o.frequency.value = MELODY[i++ % MELODY.length];
+    o.frequency.value = MELODY[i++ % MELODY.length] ?? 523;
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(0.035, t + 0.02);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
