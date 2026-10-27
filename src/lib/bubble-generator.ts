@@ -84,8 +84,10 @@ export function generateLevel(level: number): LevelConfig {
       count++;
     }
   }
-  const k = Math.max(0.4, 0.9 - (level - 1) * 0.006);
-  const shots = Math.max(15, Math.round(count * k));
+  // One shot can pop/drop many bubbles, so the budget is well below the bubble count
+  // and shrinks as levels go up.
+  const k = Math.max(0.28, 0.6 - (level - 1) * 0.005);
+  const shots = Math.max(12, Math.round(count * k));
   return { level, colors, rows, shots, grid };
 }
 

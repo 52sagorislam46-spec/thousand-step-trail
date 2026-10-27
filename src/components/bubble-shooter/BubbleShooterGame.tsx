@@ -237,6 +237,18 @@ export function BubbleShooterGame({ level, onWin, onClose }: Props) {
         falling.push({ x: cellX(pr, pc), y: cellY(pr), vy: -2 + Math.random() * 2, color: snapshot[pr]![pc] ?? 0, a: 1 });
       if (popped.length > 0) sfx.pop(popped.length + dropped.length);
       if (boardColors(grid).length === 0) return finish("won");
+      // ceiling drop: from level 6, every few shots the whole board moves down one row
+      if (level >= 6) {
+        const dropEvery = Math.max(4, 9 - Math.floor(level / 60));
+        const fired = cfg.shots - shots;
+        if (fired > 0 && fired % dropEvery === 0) {
+          const cols = boardColors(grid);
+          grid.pop();
+          grid.unshift(
+            Array.from({ length: GRID_COLS }, () => cols[Math.floor(Math.random() * cols.length)] ?? 0),
+          );
+        }
+      }
       if (grid[GRID_ROWS - 1]!.some((v) => v != null)) return finish("lost");
       const cols = boardColors(grid);
       if (!cols.includes(current)) current = pick();
@@ -266,8 +278,6 @@ export function BubbleShooterGame({ level, onWin, onClose }: Props) {
       falling = falling.filter((f) => { f.vy += 0.6; f.y += f.vy; f.a -= 0.03; return f.y < H + R && f.a > 0; });
 
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "rgba(255,255,255,0.08)";
-      ctx.fillRect(0, cellY(GRID_ROWS - 1) - R, W, 2);
       for (let r = 0; r < GRID_ROWS; r++)
         for (let c = 0; c < GRID_COLS; c++) {
           const v = grid[r]![c];
@@ -332,20 +342,15 @@ export function BubbleShooterGame({ level, onWin, onClose }: Props) {
           <X className="h-5 w-5" />
         </button>
         <p className="text-lg font-extrabold">লেভেল {level}</p>
-        <p className="rounded-xl bg-game-header/90 px-3 py-2 text-sm font-bold shadow-lg ring-1 ring-white/15">
-          শট: {shotsLeft}
-        </p>
+        <span aria-hidden className="h-10 w-10" data-shots={shotsLeft} />
       </div>
       <div className="flex w-full max-w-[480px] flex-1 items-start justify-center px-2">
         <canvas
           ref={canvasRef}
-          className="max-h-[calc(100vh-120px)] w-full touch-none rounded-2xl bg-game-header/40 ring-1 ring-white/10"
+          className="max-h-[calc(100vh-80px)] w-full touch-none rounded-2xl bg-game-header/40 ring-1 ring-white/10"
           style={{ aspectRatio: `${W} / ${H}` }}
         />
       </div>
-      <p className="pb-2 text-center text-xs font-semibold text-white/70">
-        টেনে নিশানা দিয়ে ছাড়ুন • গোল বেসে ট্যাপ করলে বাবল বদলাবে
-      </p>
 
       {status !== "playing" && (
         <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/60 p-4">

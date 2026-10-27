@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { CircleHelp, RotateCcw, Star, X } from "lucide-react";
+import { CircleHelp, Lock, RotateCcw, Star, X } from "lucide-react";
 
 import {
   buildLevelLayout,
@@ -243,7 +243,7 @@ export function LevelMapPage() {
                 )}
                 style={sphereBackground(state)}
               >
-                {level}
+                {isLocked ? <Lock className="h-6 w-6" aria-hidden /> : level}
               </span>
               <span aria-hidden className="-mt-1.5 h-2.5 w-11 rounded-full bg-game-base opacity-90" />
               {isDone && (
@@ -312,7 +312,13 @@ export function LevelMapPage() {
           key={playing}
           level={playing}
           onWin={(stars) => completeLevel(playing, stars)}
-          onClose={() => setPlaying(null)}
+          onClose={() => {
+            setPlaying(null);
+            window.setTimeout(() => {
+              const el = nodeRefs.current.get(progress.unlocked);
+              if (el) window.scrollTo({ top: Math.max(0, el.offsetTop - window.innerHeight * 0.55) });
+            }, 30);
+          }}
         />
       )}
 
