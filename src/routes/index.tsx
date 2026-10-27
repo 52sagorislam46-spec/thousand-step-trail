@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { CircleHelp, Lock, RotateCcw, Star, X } from "lucide-react";
+import { CircleHelp, Lock, Star, X } from "lucide-react";
 
 import {
   buildLevelLayout,
