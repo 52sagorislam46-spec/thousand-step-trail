@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { CircleHelp, Lock, RotateCcw, Star, X } from "lucide-react";
+import { CircleHelp, Lock, Star, X } from "lucide-react";
 
 import {
   buildLevelLayout,
@@ -56,23 +56,27 @@ export function LevelMapPage() {
   const [playing, setPlaying] = useState<number | null>(null);
   const [shake, setShake] = useState<number | null>(null);
   const nodeRefs = useRef(new Map<number, HTMLElement>());
+  const [scrollTick, setScrollTick] = useState(0);
+  const unlockedLevel = progress?.unlocked ?? null;
 
   useEffect(() => {
     setProgress(loadProgress());
   }, []);
 
-  // Jump to the current level when the map first loads.
+  // Keep the map positioned at the current open level (on load and after leaving a game).
   useEffect(() => {
-    if (!progress) return;
-    try {
-      const el = nodeRefs.current.get(progress.unlocked);
-      if (el) {
-        window.scrollTo({ top: Math.max(0, el.offsetTop - window.innerHeight * 0.55) });
+    if (unlockedLevel === null) return;
+    const go = () => {
+      try {
+        const el = nodeRefs.current.get(unlockedLevel);
+        el?.scrollIntoView({ block: "center", behavior: "auto" });
+      } catch {
+        // environments without scrolling (tests)
       }
-    } catch {
-      // environments without window scrolling (tests)
-    }
-  }, [progress]);
+    };
+    const timers = [0, 60, 250].map((ms) => window.setTimeout(go, ms));
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [unlockedLevel, scrollTick]);
 
   if (!progress) {
     return (
@@ -123,14 +127,6 @@ export function LevelMapPage() {
   return (
     <div className="game-bg min-h-screen text-game-text">
       <header className="sticky top-0 z-50 mx-auto flex w-full max-w-[480px] items-center justify-end gap-2 px-3 py-2.5">
-        <button
-          type="button"
-          onClick={resetProgress}
-          aria-label="প্রগ্রেস রিসেট"
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-game-header/90 text-game-text shadow-lg ring-1 ring-white/15 backdrop-blur transition-transform active:scale-95"
-        >
-          <RotateCcw className="h-5 w-5" />
-        </button>
         <button
           type="button"
           onClick={() => setShowHelp(true)}
@@ -243,7 +239,14 @@ export function LevelMapPage() {
                 )}
                 style={sphereBackground(state)}
               >
-                {isLocked ? <Lock className="h-6 w-6" aria-hidden /> : level}
+                {isLocked ? (
+                  <span className="flex flex-col items-center leading-none">
+                    <Lock className="h-4 w-4" aria-hidden />
+                    <span className="mt-0.5 text-sm font-extrabold">{level}</span>
+                  </span>
+                ) : (
+                  level
+                )}
               </span>
               <span aria-hidden className="-mt-1.5 h-2.5 w-11 rounded-full bg-game-base opacity-90" />
               {isDone && (
@@ -314,10 +317,7 @@ export function LevelMapPage() {
           onWin={(stars) => completeLevel(playing, stars)}
           onClose={() => {
             setPlaying(null);
-            window.setTimeout(() => {
-              const el = nodeRefs.current.get(progress.unlocked);
-              if (el) window.scrollTo({ top: Math.max(0, el.offsetTop - window.innerHeight * 0.55) });
-            }, 30);
+            setScrollTick((t) => t + 1);
           }}
         />
       )}
