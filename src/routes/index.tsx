@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { CircleHelp, Lock, Star, X } from "lucide-react";
+import { CircleHelp, Lock, Settings, Star, X } from "lucide-react";
+import { SettingsDialog } from "@/components/SettingsDialog";
+import { startMusic } from "@/lib/game-settings";
 
 import {
   buildLevelLayout,
@@ -53,6 +55,7 @@ export function LevelMapPage() {
   const [progress, setProgress] = useState<Progress | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [playing, setPlaying] = useState<number | null>(null);
   const [shake, setShake] = useState<number | null>(null);
   const nodeRefs = useRef(new Map<number, HTMLElement>());
@@ -126,7 +129,7 @@ export function LevelMapPage() {
 
   return (
     <div className="game-bg min-h-screen text-game-text">
-      <header className="sticky top-0 z-50 mx-auto flex w-full max-w-[480px] items-center justify-end gap-2 px-3 py-2.5">
+      <header className="sticky top-0 z-50 mx-auto flex w-full max-w-[480px] flex-col items-end gap-2 px-3 py-2.5">
         <button
           type="button"
           onClick={() => setShowHelp(true)}
@@ -135,7 +138,19 @@ export function LevelMapPage() {
         >
           <CircleHelp className="h-5 w-5" />
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            startMusic();
+            setShowSettings(true);
+          }}
+          aria-label="সেটিংস"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-game-header/90 text-game-text shadow-lg ring-1 ring-white/15 backdrop-blur transition-transform active:scale-95"
+        >
+          <Settings className="h-5 w-5" />
+        </button>
       </header>
+      {showSettings && <SettingsDialog onClose={() => setShowSettings(false)} />}
 
       <main className="relative mx-auto w-full max-w-[480px]" style={{ height }}>
         <svg
