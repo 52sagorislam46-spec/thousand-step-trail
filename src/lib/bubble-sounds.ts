@@ -1,8 +1,10 @@
 // Simple WebAudio sound effects for the bubble shooter. No external files needed.
+import { getSettings } from "./game-settings";
 let audio: AudioContext | null = null;
 
 function ac(): AudioContext | null {
   if (typeof window === "undefined") return null;
+  if (!getSettings().sound) return null;
   const AC =
     window.AudioContext ??
     (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
